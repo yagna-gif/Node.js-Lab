@@ -1,0 +1,105 @@
+WebApp/
+├── src/
+│   └── com/example/controller/
+│         FrontController.java
+│         Action.java
+│         LoginAction.java
+│         DashboardAction.java
+├── WebContent/
+│   ├── WEB-INF/
+│   │   ├── web.xml
+│   │   └── jsp/
+│   │       ├── login.jsp
+│   │       └── dashboard.jsp
+│   └── index.jsp
+
+
+Action.java
+
+package com.example.controller;
+
+import javax.servlet.http.*;
+public interface Action {
+    String execute(HttpServletRequest req, HttpServletResponse resp) throws Exception;
+}
+
+
+LoginAction.java
+
+package com.example.controller;
+
+import javax.servlet.http.*;
+
+public class LoginAction implements Action {
+    @Override
+    public String execute(HttpServletRequest req, HttpServletResponse resp) {
+        String user = req.getParameter("user");
+        String pass = req.getParameter("pass");
+        if ("admin".equals(user) && "admin123".equals(pass)) {
+            req.getSession().setAttribute("user", user);
+            return "dashboard";
+        }
+        req.setAttribute("error", "Invalid credentials");
+        return "login";
+    }
+}
+
+
+DashboardAction.java
+
+package com.example.controller;
+
+import javax.servlet.http.*;
+
+public class DashboardAction implements Action {
+    @Override
+    public String execute(HttpServletRequest req, HttpServletResponse resp) {
+        if (req.getSession().getAttribute("user") == null) {
+            return "login";
+        }
+        return "dashboard";
+    }
+}
+
+
+FrontController.java
+
+package com.example.controller;
+
+import javax.servlet.*;
+import javax.servlet.http.*;
+import java.io.IOException;
+
+public class FrontController extends HttpServlet {
+    @Override
+    protected void service(HttpServletRequest req, HttpServletResponse resp)
+            throws ServletException, IOException {
+        String actionName = req.getServletPath().substring(1).replace(".do", "");
+        Action action;
+        switch(actionName) {
+            case "login": action = new LoginAction(); break;
+            case "dashboard": action = new DashboardAction(); break;
+            default: action = (r, s) -> "login";
+        }
+        try {
+            String view = action.execute(req, resp) + ".jsp";
+            req.getRequestDispatcher("/WEB-INF/jsp/" + view).forward(req, resp);
+        } catch(Exception e) {
+            throw new ServletException(e);
+        }
+    }
+}
+
+
+web.xml
+
+<web-app ...>
+  <servlet>
+    <servlet-name>FrontController</servlet-name>
+    <servlet-class>com.example.controller.FrontController</servlet-class>
+  </servlet>
+  <servlet-mapping>
+    <servlet-name>FrontController</servlet-name>
+    <url-pattern>*.do</url-pattern>
+  </servlet-mapping>
+</web-app>
