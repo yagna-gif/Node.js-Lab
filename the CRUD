@@ -1,0 +1,107 @@
+JavaCRUDApp/
+└── CRUDOperations.java
+
+ SQL Setup:
+CREATE DATABASE testdb;
+USE testdb;
+
+CREATE TABLE students (
+  id INT PRIMARY KEY,
+  name VARCHAR(50),
+  age INT
+);
+
+CRUDOperations.java
+import java.sql.*;
+import java.util.Scanner;
+
+public class CRUDOperations {
+    static final String URL = "jdbc:mysql://localhost:3306/testdb";
+    static final String USER = "root"; // change if needed
+    static final String PASS = "password"; // change if needed
+
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
+
+        try (Connection con = DriverManager.getConnection(URL, USER, PASS)) {
+            while (true) {
+                System.out.println("\n1. Insert\n2. Read\n3. Update\n4. Delete\n5. Exit");
+                System.out.print("Enter choice: ");
+                int choice = sc.nextInt();
+
+                switch (choice) {
+                    case 1:
+                        System.out.print("Enter ID: ");
+                        int id = sc.nextInt();
+                        System.out.print("Enter Name: ");
+                        String name = sc.next();
+                        System.out.print("Enter Age: ");
+                        int age = sc.nextInt();
+
+                        String insertSQL = "INSERT INTO students VALUES (?, ?, ?)";
+                        try (PreparedStatement ps = con.prepareStatement(insertSQL)) {
+                            ps.setInt(1, id);
+                            ps.setString(2, name);
+                            ps.setInt(3, age);
+                            ps.executeUpdate();
+                            System.out.println("Inserted successfully.");
+                        }
+                        break;
+
+                    case 2:
+                        Statement stmt = con.createStatement();
+                        ResultSet rs = stmt.executeQuery("SELECT * FROM students");
+                        while (rs.next()) {
+                            System.out.println(rs.getInt("id") + " " + rs.getString("name") + " " + rs.getInt("age"));
+                        }
+                        break;
+
+                    case 3:
+                        System.out.print("Enter ID to update: ");
+                        int uid = sc.nextInt();
+                        System.out.print("Enter new Name: ");
+                        String newName = sc.next();
+                        System.out.print("Enter new Age: ");
+                        int newAge = sc.nextInt();
+
+                        String updateSQL = "UPDATE students SET name=?, age=? WHERE id=?";
+                        try (PreparedStatement ps = con.prepareStatement(updateSQL)) {
+                            ps.setString(1, newName);
+                            ps.setInt(2, newAge);
+                            ps.setInt(3, uid);
+                            ps.executeUpdate();
+                            System.out.println("Updated successfully.");
+                        }
+                        break;
+
+                    case 4:
+                        System.out.print("Enter ID to delete: ");
+                        int did = sc.nextInt();
+
+                        String deleteSQL = "DELETE FROM students WHERE id=?";
+                        try (PreparedStatement ps = con.prepareStatement(deleteSQL)) {
+                            ps.setInt(1, did);
+                            ps.executeUpdate();
+                            System.out.println("Deleted successfully.");
+                        }
+                        break;
+
+                    case 5:
+                        System.out.println("Exiting...");
+                        System.exit(0);
+                }
+            }
+        } catch (SQLException e) {
+            System.out.println("DB Error: " + e.getMessage());
+        }
+    }
+}
+
+
+
+Compile:
+javac -cp .;mysql-connector-java.jar CRUDOperations.java
+Run:
+java -cp .;mysql-connector-java.jar CRUDOperations
+
+
