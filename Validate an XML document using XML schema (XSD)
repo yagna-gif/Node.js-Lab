@@ -1,0 +1,45 @@
+xml-validation/
+├── bookstore.xml
+├── bookstore.xsd
+
+ bookstore.xml
+<?xml version="1.0" encoding="UTF-8"?>
+<bookstore xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+           xsi:noNamespaceSchemaLocation="bookstore.xsd">
+  <book>
+    <title>Node.js Basics</title>
+    <author>Yagnesh Rangaraju</author>
+    <price>499.99</price>
+  </book>
+  <book>
+    <title>Learn Java</title>
+    <author>James Gosling</author>
+    <price>599.50</price>
+  </book>
+</bookstore>
+
+bookstore.xsd
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
+
+  <xs:element name="bookstore">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="book" maxOccurs="unbounded">
+          <xs:complexType>
+            <xs:sequence>
+              <xs:element name="title" type="xs:string"/>
+              <xs:element name="author" type="xs:string"/>
+              <xs:element name="price" type="xs:decimal"/>
+            </xs:sequence>
+          </xs:complexType>
+        </xs:element>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+
+</xs:schema>
+
+
+https://www.freeformatter.com/xml-validator-xsd.html
+
